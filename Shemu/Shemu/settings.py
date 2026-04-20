@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'payroll_app.apps.MyappConfig'
+    'payroll_app.apps.PayrollAppConfig'
 ]
 
 MIDDLEWARE = [
