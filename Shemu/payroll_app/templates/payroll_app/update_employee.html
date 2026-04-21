@@ -1,0 +1,30 @@
+{% extends 'payroll_app/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h2 class="mb-4">Update Employee</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control" value="{{ employee.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">ID Number</label>
+                <input type="text" class="form-control" value="{{ employee.id_number }}" disabled>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Rate</label>
+                <input type="number" name="rate" class="form-control" step="0.01" value="{{ employee.rate }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Allowance (Optional)</label>
+                <input type="number" name="allowance" class="form-control" step="0.01" value="{{ employee.allowance|default:'' }}">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+            <a href="{% url 'employees' %}" class="btn btn-secondary w-100 mt-2">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

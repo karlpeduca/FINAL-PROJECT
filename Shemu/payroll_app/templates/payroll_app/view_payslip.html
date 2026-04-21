@@ -1,0 +1,69 @@
+{% extends 'payroll_app/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+
+        <div class="d-flex justify-content-between mb-4">
+            <div>
+                <div><strong>NAME:</strong> {{ payslip.id_number.name }}</div>
+                <div><strong>ID NUMBER:</strong> {{ payslip.id_number.id_number }}</div>
+            </div>
+            <div class="text-end">
+                <div><strong>DATE:</strong> {{ payslip.date_range }}, {{ payslip.year }}</div>
+                <div><strong>PAYSLIP ID:</strong> {{ payslip.pk }}</div>
+            </div>
+        </div>
+
+        <h5>EARNINGS</h5>
+        <table class="table table-sm table-bordered mb-4">
+            <tbody>
+                <tr>
+                    <td>Base Pay (½ Rate)</td>
+                    <td class="text-end">{{ payslip.getCycleRate }}</td>
+                </tr>
+                <tr>
+                    <td>Allowances</td>
+                    <td class="text-end">{{ payslip.earnings_allowance }}</td>
+                </tr>
+                <tr>
+                    <td>Overtime</td>
+                    <td class="text-end">{{ payslip.overtime }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h5>DEDUCTIONS</h5>
+        <table class="table table-sm table-bordered mb-4">
+            <tbody>
+                <tr>
+                    <td>W/Holding Tax</td>
+                    <td class="text-end">{{ payslip.deductions_tax }}</td>
+                </tr>
+                {% if payslip.pay_cycle == 1 %}
+                <tr>
+                    <td>Pag-IBIG</td>
+                    <td class="text-end">{{ payslip.pag_ibig }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td>PhilHealth</td>
+                    <td class="text-end">{{ payslip.deductions_health }}</td>
+                </tr>
+                <tr>
+                    <td>SSS</td>
+                    <td class="text-end">{{ payslip.sss }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-between border-top pt-3">
+            <h5><strong>NET PAY</strong></h5>
+            <h5><strong>PHP {{ payslip.total_pay }}</strong></h5>
+        </div>
+
+        <a href="{% url 'payslips' %}" class="btn btn-secondary mt-3">Back to Payslips</a>
+    </div>
+</div>
+{% endblock %}
