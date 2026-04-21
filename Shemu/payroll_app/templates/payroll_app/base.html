@@ -1,0 +1,38 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>LAZAPEE Payroll</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+        <link rel="stylesheet" href="{% static '/bootstrap/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static '/bootstrap/css/custom.css' %}">
+
+        <script src="{% static '/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-dark bg-grey mb-3 sticky-top">
+            <div class="container-fluid">
+                <a class="navbar-brand navbar-brand-grey mb-0" href="#">Employees</a>
+                <a class="navbar-brand navbar-brand-grey mb-0" href="#">Payslips</a>
+            </div>
+        </nav>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer bg-grey"
+             style="position:sticky;">
+             <div class="container">&copy; 2020</div>
+        </footer>
+
+    </body>
+</html>
