@@ -1,78 +1,87 @@
 {% extends 'payroll_app/base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Payroll Creation</h2>
+<div class="page-header">
+    <h1 class="page-title">Payslips</h1>
+</div>
 
-{% if error_message %}
-    <div class="alert alert-danger">{{ error_message }}</div>
-{% endif %}
+<!-- Payroll Creation Form -->
+<div class="card mb-4">
+    <div class="card-header-custom">Payroll Creation</div>
+    <div class="card-body p-4">
+        {% if error_message %}
+            <div class="alert alert-danger mb-3">{{ error_message }}</div>
+        {% endif %}
+        <form method="post" class="row g-3 align-items-end">
+            {% csrf_token %}
+            <div class="col-md-4">
+                <label class="form-label">Payroll for</label>
+                <select name="payroll_for" class="form-select" required>
+                    <option value="" disabled selected>Choose...</option>
+                    <option value="all">All Employees</option>
+                    {% for emp in employees %}
+                        <option value="{{ emp.id_number }}">{{ emp.id_number }} — {{ emp.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Month</label>
+                <select name="month" class="form-select" required>
+                    <option value="" disabled selected>Choose...</option>
+                    {% for m in months %}
+                        <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Year</label>
+                <input type="text" name="year" class="form-control" placeholder="e.g. 2026" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Cycle</label>
+                <select name="cycle" class="form-select" required>
+                    <option value="" disabled selected>Choose...</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-accent w-100">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-<form method="post" class="row g-3 mb-5">
-    {% csrf_token %}
-    <div class="col-md-4">
-        <label class="form-label">Payroll for</label>
-        <select name="payroll_for" class="form-select" required>
-            <option value="" disabled selected>Choose...</option>
-            <option value="all">All Employees</option>
-            {% for emp in employees %}
-                <option value="{{ emp.id_number }}">{{ emp.id_number }} — {{ emp.name }}</option>
+<!-- Payslips Summary -->
+<div class="card">
+    <div class="card-header-custom">Payslips Summary</div>
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th>ID Number</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Cycle</th>
+                <th>Total Pay</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ps in payslips %}
+            <tr>
+                <td><span class="text-muted">{{ ps.id_number.id_number }}</span></td>
+                <td>{{ ps.id_number.name }}</td>
+                <td>{{ ps.date_range }}, {{ ps.year }}</td>
+                <td><span class="badge-cycle">Cycle {{ ps.pay_cycle }}</span></td>
+                <td><strong>₱{{ ps.total_pay }}</strong></td>
+                <td><a href="{% url 'view_payslip' ps.pk %}" class="btn btn-sm btn-accent">View</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">No payslips yet.</td>
+            </tr>
             {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-3">
-        <label class="form-label">Month</label>
-        <select name="month" class="form-select" required>
-            <option value="" disabled selected>Choose...</option>
-            {% for m in months %}
-                <option value="{{ m }}">{{ m }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-2">
-        <label class="form-label">Year</label>
-        <input type="text" name="year" class="form-control" placeholder="e.g. 2026" required>
-    </div>
-    <div class="col-md-2">
-        <label class="form-label">Cycle</label>
-        <select name="cycle" class="form-select" required>
-            <option value="" disabled selected>Choose...</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-        </select>
-    </div>
-    <div class="col-md-1 d-flex align-items-end">
-        <button type="submit" class="btn btn-primary w-100">Submit</button>
-    </div>
-</form>
-
-<h2 class="mb-3">Payslips Summary</h2>
-
-<table class="table table-bordered table-hover">
-    <thead class="table-dark">
-        <tr>
-            <th>ID Number</th>
-            <th>Date</th>
-            <th>Cycle</th>
-            <th>Total Pay</th>
-            <th>Options</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for ps in payslips %}
-        <tr>
-            <td>{{ ps.id_number.id_number }}</td>
-            <td>{{ ps.date_range }}, {{ ps.year }}</td>
-            <td>{{ ps.pay_cycle }}</td>
-            <td>{{ ps.total_pay }}</td>
-            <td>
-                <a href="{% url 'view_payslip' ps.pk %}" class="btn btn-sm btn-info">View</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="text-center text-muted">No payslips yet.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 {% endblock %}

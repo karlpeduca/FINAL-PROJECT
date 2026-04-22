@@ -1,38 +1,376 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shemu Payroll</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── DARK THEME ── */
+        [data-theme="dark"] {
+            --bg: #0d0d0d;
+            --surface: #161616;
+            --surface2: #1f1f1f;
+            --border: #2a2a2a;
+            --accent: #00e5ff;
+            --accent-hover: rgba(0, 229, 255, 0.08);
+            --text: #f0f0f0;
+            --text-inverse: #0d0d0d;
+            --muted: #aaaaaa;
+            --table-hover: rgba(255,255,255,0.03);
+            --input-bg: #1f1f1f;
+            --input-border: #2a2a2a;
+        }
+
+        /* ── LIGHT THEME ── */
+        [data-theme="light"] {
+            --bg: #f4f6f9;
+            --surface: #ffffff;
+            --surface2: #f0f2f5;
+            --border: #dee2e6;
+            --accent: #0f1f3d;
+            --accent-hover: rgba(15, 31, 61, 0.06);
+            --text: #1a1a1a;
+            --text-inverse: #ffffff;
+            --muted: #6c757d;
+            --table-hover: rgba(0,0,0,0.02);
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background-color: var(--surface) !important;
+            border-bottom: 1px solid var(--border);
+            padding: 0.9rem 2rem;
+            transition: background-color 0.3s;
+        }
+
+        .navbar-brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent) !important;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .nav-link {
+            color: var(--muted) !important;
+            font-weight: 500;
+            font-size: 0.88rem;
+            letter-spacing: 0.5px;
+            padding: 0.45rem 1rem !important;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text) !important;
+            background-color: var(--surface2);
+        }
+
+        .nav-link.active {
+            color: var(--accent) !important;
+            background-color: var(--accent-hover);
+        }
+
+        /* ── THEME TOGGLE ── */
+        .theme-toggle {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.3rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── MUTED TEXT ── */
+        .text-muted {
+            color: var(--muted) !important;
+        }
+
+        /* ── MAIN ── */
+        .main-content {
+            flex: 1;
+            padding: 2.5rem 0;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: none;
+            transition: background-color 0.3s;
+        }
+
+        .card-header-custom {
+            background-color: var(--accent);
+            color: var(--text-inverse);
+            border-radius: 10px 10px 0 0;
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        [data-theme="dark"] .card-header-custom {
+            color: var(--bg);
+        }
+
+        /* ── TABLES ── */
+        .table {
+            color: var(--text);
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: var(--surface2);
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-color: var(--border);
+            padding: 0.85rem 1.25rem;
+        }
+
+        .table tbody td {
+            padding: 0.9rem 1.25rem;
+            vertical-align: middle;
+            border-color: var(--border);
+            font-size: 0.92rem;
+            background-color: var(--surface);
+            color: var(--text);
+        }
+
+        .table tbody tr:hover td {
+            background-color: var(--table-hover);
+        }
+
+        /* ── BUTTONS ── */
+        .btn-accent {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: var(--text-inverse);
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        [data-theme="dark"] .btn-accent {
+            color: var(--bg);
+        }
+
+        .btn-accent:hover {
+            filter: brightness(1.1);
+            color: var(--text-inverse);
+        }
+
+        [data-theme="dark"] .btn-accent:hover {
+            color: var(--bg);
+        }
+
+        .btn-outline-accent {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .btn-outline-accent:hover {
+            background-color: var(--accent);
+            color: var(--text-inverse);
+        }
+
+        [data-theme="dark"] .btn-outline-accent:hover {
+            color: var(--bg);
+        }
+
+        /* ── FORMS ── */
+        .form-label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, .form-select {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text);
+            border-radius: 6px;
+            font-size: 0.92rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--input-bg);
+            border-color: var(--accent);
+            color: var(--text);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.1);
+        }
+
+        [data-theme="light"] .form-control:focus,
+        [data-theme="light"] .form-select:focus {
+            box-shadow: 0 0 0 3px rgba(15, 31, 61, 0.1);
+        }
+
+        .form-select option {
+            background-color: var(--surface);
+            color: var(--text);
+        }
+
+        /* ── FORM CARD ── */
+        .form-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .form-card h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        /* ── ALERTS ── */
+        .alert {
+            border-radius: 8px;
+            font-size: 0.9rem;
+            border: none;
+        }
+
+        .alert-danger {
+            background-color: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+            border-left: 3px solid #ff4d4d;
+        }
+
+        .alert-success {
+            background-color: rgba(0, 201, 122, 0.1);
+            color: #00c97a;
+            border-left: 3px solid #00c97a;
+        }
+
+        /* ── BADGE ── */
+        .badge-cycle {
+            background-color: var(--accent-hover);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            padding: 0.25rem 0.65rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background-color: var(--surface);
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s;
+        }
+    </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'employees' %}">Shemu</a>
-        <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'employees' %}">Employees</a>
-            <a class="nav-link" href="{% url 'payslips' %}">Payslips</a>
+        <a class="navbar-brand" href="{% url 'employees' %}">Shemu</a>
+        <div class="navbar-nav ms-auto d-flex align-items-center gap-2">
+            <a class="nav-link {% if request.resolver_match.url_name == 'employees' or request.resolver_match.url_name == 'create_employee' or request.resolver_match.url_name == 'update_employee' %}active{% endif %}" href="{% url 'employees' %}">Employees</a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'payslips' or request.resolver_match.url_name == 'view_payslip' %}active{% endif %}" href="{% url 'payslips' %}">Payslips</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4">
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    {% endfor %}
+<div class="main-content">
+    <div class="container">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
 
-    {% block content %}{% endblock %}
+        {% block content %}{% endblock %}
+    </div>
 </div>
 
-<footer class="text-center text-muted py-3 mt-5 border-top">
-    &copy; 2026 Shemu
+<footer>
+    &copy; 2026 Shemu &mdash; Payroll System
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const savedTheme = localStorage.getItem('shemu-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateToggleBtn(savedTheme);
+
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('shemu-theme', next);
+        updateToggleBtn(next);
+    }
+
+    function updateToggleBtn(theme) {
+        const btn = document.getElementById('themeBtn');
+        btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+    }
+</script>
 </body>
 </html>
