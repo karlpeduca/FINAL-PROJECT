@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import Employee, Payslip
+from django.contrib.auth import authenticate, login, logout
+from .models import Employee, Payslip, AuditLog
+from django.contrib.auth.models import User
 
 MONTHS = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -28,14 +30,128 @@ SSS_RATE = 0.045
 TAX_RATE = 0.2
 
 
+# ── HELPERS ──────────────────────────────────────────────────────────────────
+
+def log_action(user, action):
+    AuditLog.objects.create(user=user, action=action)
+
+
+# ── AUTH ─────────────────────────────────────────────────────────────────────
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('employees')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('employees')
+        else:
+            messages.error(request, 'Invalid username or password.')
+
+    return render(request, 'payroll_app/login.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect('employees')
+
+    if request.method == 'POST':
+        username  = request.POST.get('username', '').strip()
+        password1 = request.POST.get('password1', '').strip()
+        password2 = request.POST.get('password2', '').strip()
+
+        if not username or not password1 or not password2:
+            messages.error(request, 'All fields are required.')
+            return render(request, 'payroll_app/signup.html')
+
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'payroll_app/signup.html')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, f'Username {username} is already taken.')
+            return render(request, 'payroll_app/signup.html')
+
+        user = User.objects.create_user(username=username, password=password1)
+        log_action(user, f'Account created: {username}')
+        messages.success(request, 'Account created! Please log in.')
+        return redirect('login')
+
+    return render(request, 'payroll_app/signup.html')
+
+
+def manage_account(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    error_fields = {}
+    form_data = {}
+
+    if request.method == 'POST':
+        new_username  = request.POST.get('username', '').strip()
+        old_password  = request.POST.get('old_password', '').strip()
+        new_password1 = request.POST.get('new_password1', '').strip()
+        new_password2 = request.POST.get('new_password2', '').strip()
+        form_data     = {'username': new_username}
+        user          = request.user
+
+        if new_username and new_username != user.username:
+            if User.objects.filter(username=new_username).exists():
+                error_fields['username'] = 'That username is already taken.'
+            else:
+                old_username = user.username
+                user.username = new_username
+                user.save()
+                log_action(user, f'Changed username from {old_username} to {new_username}')
+                messages.success(request, 'Username updated.')
+
+        if old_password or new_password1 or new_password2:
+            if not user.check_password(old_password):
+                error_fields['old_password'] = 'Current password is incorrect.'
+            if new_password1 != new_password2:
+                error_fields['new_password2'] = 'Passwords do not match.'
+            if not new_password1:
+                error_fields['new_password1'] = 'New password cannot be empty.'
+
+            if not error_fields:
+                user.set_password(new_password1)
+                user.save()
+                log_action(user, 'Changed password')
+                messages.success(request, 'Password updated. Please log in again.')
+                return redirect('login')
+
+        if not error_fields:
+            return redirect('employees')
+
+    return render(request, 'payroll_app/manage_account.html', {
+        'error_fields': error_fields,
+        'form_data':    form_data,
+    })
+
+
 # ── EMPLOYEES ────────────────────────────────────────────────────────────────
 
 def employees(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     all_employees = Employee.objects.all()
     return render(request, 'payroll_app/employees.html', {'employees': all_employees})
 
 
 def create_employee(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     if request.method == 'POST':
         name      = request.POST.get('name', '').strip()
         id_number = request.POST.get('id_number', '').strip()
@@ -57,6 +173,7 @@ def create_employee(request):
             allowance=float(allowance) if allowance else None,
             overtime_pay=0.0,
         )
+        log_action(request.user, f'Created employee: {name} (ID: {id_number})')
         messages.success(request, f'Employee {name} created successfully.')
         return redirect('employees')
 
@@ -64,14 +181,19 @@ def create_employee(request):
 
 
 def update_employee(request, id_number):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     employee = get_object_or_404(Employee, pk=id_number)
 
     if request.method == 'POST':
-        employee.name      = request.POST.get('name', '').strip()
-        employee.rate      = float(request.POST.get('rate', employee.rate))
-        allowance          = request.POST.get('allowance', '').strip()
+        old_rate       = employee.rate
+        employee.name  = request.POST.get('name', '').strip()
+        employee.rate  = float(request.POST.get('rate', employee.rate))
+        allowance      = request.POST.get('allowance', '').strip()
         employee.allowance = float(allowance) if allowance else None
         employee.save()
+        log_action(request.user, f'Updated employee: {employee.name} (ID: {id_number}) — rate changed from {old_rate} to {employee.rate}')
         messages.success(request, f'Employee {employee.name} updated.')
         return redirect('employees')
 
@@ -79,13 +201,20 @@ def update_employee(request, id_number):
 
 
 def delete_employee(request, id_number):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     employee = get_object_or_404(Employee, pk=id_number)
+    log_action(request.user, f'Deleted employee: {employee.name} (ID: {id_number})')
     employee.delete()
     messages.success(request, 'Employee deleted.')
     return redirect('employees')
 
 
 def add_overtime(request, id_number):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     employee = get_object_or_404(Employee, pk=id_number)
 
     if request.method == 'POST':
@@ -94,6 +223,7 @@ def add_overtime(request, id_number):
             ot_pay = (employee.rate / 160) * 1.5 * float(hours)
             employee.overtime_pay = (employee.overtime_pay or 0.0) + ot_pay
             employee.save()
+            log_action(request.user, f'Added overtime of {ot_pay:.2f} to {employee.name} (ID: {id_number})')
             messages.success(request, f'Overtime of {ot_pay:.2f} added to {employee.name}.')
         else:
             messages.error(request, 'Please enter overtime hours.')
@@ -104,6 +234,9 @@ def add_overtime(request, id_number):
 # ── PAYSLIPS ─────────────────────────────────────────────────────────────────
 
 def payslips(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     all_employees = Employee.objects.all()
     all_payslips  = Payslip.objects.select_related('id_number').all()
     error_message = None
@@ -165,6 +298,7 @@ def payslips(request):
                     total_pay=total_pay,
                 )
                 emp.resetOvertime()
+                log_action(request.user, f'Generated cycle {cycle} payslip for {emp.name} (ID: {emp.id_number}) — {date_range}, {year}')
 
             if skipped:
                 error_message = f'Payslip already exists for: {", ".join(skipped)}. Skipped.'
@@ -183,5 +317,8 @@ def payslips(request):
 
 
 def view_payslip(request, pk):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     payslip = get_object_or_404(Payslip, pk=pk)
     return render(request, 'payroll_app/view_payslip.html', {'payslip': payslip})

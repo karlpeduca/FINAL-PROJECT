@@ -1,0 +1,59 @@
+{% extends 'payroll_app/base.html' %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Manage Account</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <p class="text-muted mb-4" style="font-size:0.85rem;">Logged in as <strong style="color:var(--text);">{{ request.user.username }}</strong></p>
+
+        <h6 class="text-uppercase mb-3" style="color:var(--muted); letter-spacing:1px; font-size:0.78rem;">Change Username</h6>
+        <div class="mb-4">
+            <label class="form-label">New Username</label>
+            <input type="text" name="username" class="form-control {% if 'username' in error_fields %}is-invalid{% endif %}" placeholder="{{ request.user.username }}" value="{{ form_data.username|default:'' }}">
+            {% if 'username' in error_fields %}
+                <div class="invalid-feedback" style="color:#ff4d4d;">{{ error_fields.username }}</div>
+            {% endif %}
+        </div>
+
+        <h6 class="text-uppercase mb-3" style="color:var(--muted); letter-spacing:1px; font-size:0.78rem;">Change Password</h6>
+        <div class="mb-3">
+            <label class="form-label">Current Password</label>
+            <input type="password" name="old_password" class="form-control {% if 'old_password' in error_fields %}is-invalid{% endif %}" placeholder="Enter current password">
+            {% if 'old_password' in error_fields %}
+                <div class="invalid-feedback" style="color:#ff4d4d;">{{ error_fields.old_password }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input type="password" name="new_password1" class="form-control {% if 'new_password1' in error_fields %}is-invalid{% endif %}" placeholder="Enter new password">
+            {% if 'new_password1' in error_fields %}
+                <div class="invalid-feedback" style="color:#ff4d4d;">{{ error_fields.new_password1 }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" name="new_password2" class="form-control {% if 'new_password2' in error_fields %}is-invalid{% endif %}" placeholder="Confirm new password">
+            {% if 'new_password2' in error_fields %}
+                <div class="invalid-feedback" style="color:#ff4d4d;">{{ error_fields.new_password2 }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-accent w-100 mb-2">Save Changes</button>
+        <a href="{% url 'employees' %}" class="btn btn-outline-secondary w-100">Cancel</a>
+    </form>
+</div>
+
+<style>
+    .is-invalid {
+        border-color: #ff4d4d !important;
+        background-color: rgba(255, 77, 77, 0.05) !important;
+    }
+
+    .is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.15) !important;
+    }
+</style>
+{% endblock %}
