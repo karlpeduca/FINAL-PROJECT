@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from .models import Employee, Payslip, AuditLog
 from django.contrib.auth.models import User
+from .models import Employee, Payslip, AuditLog
 
 MONTHS = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -59,6 +59,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
 
 def signup_view(request):
     if request.user.is_authenticated:

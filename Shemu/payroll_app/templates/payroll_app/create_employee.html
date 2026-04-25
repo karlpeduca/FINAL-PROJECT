@@ -1,30 +1,28 @@
 {% extends 'payroll_app/base.html' %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <h2 class="mb-4">Create Employee</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label">Name</label>
-                <input type="text" name="name" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">ID Number</label>
-                <input type="text" name="id_number" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Rate</label>
-                <input type="number" name="rate" class="form-control" step="0.01" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Allowance (Optional)</label>
-                <input type="number" name="allowance" class="form-control" step="0.01">
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Submit</button>
-            <a href="{% url 'employees' %}" class="btn btn-secondary w-100 mt-2">Cancel</a>
-        </form>
-    </div>
+<div class="form-card">
+    <h2>Create Employee</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" placeholder="Full name" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">ID Number</label>
+            <input type="text" name="id_number" class="form-control" placeholder="e.g. 247720" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Rate</label>
+            <input type="number" name="rate" class="form-control" step="0.01" placeholder="Monthly rate" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Allowance <span class="text-muted fw-normal">(Optional)</span></label>
+            <input type="number" name="allowance" class="form-control" step="0.01" placeholder="0.00">
+        </div>
+        <button type="submit" class="btn btn-accent w-100 mb-2">Submit</button>
+        <a href="{% url 'employees' %}" class="btn btn-outline-accent w-100">Cancel</a>
+    </form>
 </div>
 {% endblock %}

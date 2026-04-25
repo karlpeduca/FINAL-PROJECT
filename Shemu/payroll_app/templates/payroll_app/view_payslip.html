@@ -3,67 +3,76 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-7">
-
-        <div class="d-flex justify-content-between mb-4">
-            <div>
-                <div><strong>NAME:</strong> {{ payslip.id_number.name }}</div>
-                <div><strong>ID NUMBER:</strong> {{ payslip.id_number.id_number }}</div>
+        <div class="card">
+            <div class="card-header-custom d-flex justify-content-between align-items-center">
+                <span>Payslip #{{ payslip.pk }}</span>
+                <span>{{ payslip.date_range }}, {{ payslip.year }}</span>
             </div>
-            <div class="text-end">
-                <div><strong>DATE:</strong> {{ payslip.date_range }}, {{ payslip.year }}</div>
-                <div><strong>PAYSLIP ID:</strong> {{ payslip.pk }}</div>
+
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between mb-4 pb-3 border-bottom">
+                    <div>
+                        <div class="text-muted small">EMPLOYEE NAME</div>
+                        <div class="fw-semibold fs-5">{{ payslip.id_number.name }}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted small">ID NUMBER</div>
+                        <div class="fw-semibold fs-5">{{ payslip.id_number.id_number }}</div>
+                    </div>
+                </div>
+
+                <h6 class="text-uppercase fw-bold mb-3" style="color:var(--muted); letter-spacing:1px;">Earnings</h6>
+                <table class="table table-sm mb-4">
+                    <tbody>
+                        <tr>
+                            <td>Base Pay</td>
+                            <td class="text-end">₱{{ payslip.getCycleRate }}</td>
+                        </tr>
+                        <tr>
+                            <td>Allowances</td>
+                            <td class="text-end">₱{{ payslip.earnings_allowance }}</td>
+                        </tr>
+                        <tr>
+                            <td>Overtime</td>
+                            <td class="text-end">₱{{ payslip.overtime }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="text-uppercase fw-bold mb-3" style="color:var(--muted); letter-spacing:1px;">Deductions</h6>
+                <table class="table table-sm mb-4">
+                    <tbody>
+                        <tr>
+                            <td>W/Holding Tax</td>
+                            <td class="text-end">₱{{ payslip.deductions_tax }}</td>
+                        </tr>
+                        {% if payslip.pay_cycle == 1 %}
+                        <tr>
+                            <td>Pag-IBIG</td>
+                            <td class="text-end">₱{{ payslip.pag_ibig }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if payslip.pay_cycle == 2 %}
+                        <tr>
+                            <td>PhilHealth</td>
+                            <td class="text-end">₱{{ payslip.deductions_health }}</td>
+                        </tr>
+                        <tr>
+                            <td>SSS</td>
+                            <td class="text-end">₱{{ payslip.sss }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <h5 class="fw-bold mb-0">NET PAY</h5>
+                    <h4 class="fw-bold mb-0" style="color:var(--accent)">₱{{ payslip.total_pay }}</h4>
+                </div>
             </div>
         </div>
 
-        <h5>EARNINGS</h5>
-        <table class="table table-sm table-bordered mb-4">
-            <tbody>
-                <tr>
-                    <td>Base Pay</td>
-                    <td class="text-end">{{ payslip.getCycleRate }}</td>
-                </tr>
-                <tr>
-                    <td>Allowances</td>
-                    <td class="text-end">{{ payslip.earnings_allowance }}</td>
-                </tr>
-                <tr>
-                    <td>Overtime</td>
-                    <td class="text-end">{{ payslip.overtime }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h5>DEDUCTIONS</h5>
-        <table class="table table-sm table-bordered mb-4">
-            <tbody>
-                <tr>
-                    <td>W/Holding Tax</td>
-                    <td class="text-end">{{ payslip.deductions_tax }}</td>
-                </tr>
-                {% if payslip.pay_cycle == 1 %}
-                <tr>
-                    <td>Pag-IBIG</td>
-                    <td class="text-end">{{ payslip.pag_ibig }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td>PhilHealth</td>
-                    <td class="text-end">{{ payslip.deductions_health }}</td>
-                </tr>
-                <tr>
-                    <td>SSS</td>
-                    <td class="text-end">{{ payslip.sss }}</td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-
-        <div class="d-flex justify-content-between border-top pt-3">
-            <h5><strong>NET PAY</strong></h5>
-            <h5><strong>PHP {{ payslip.total_pay }}</strong></h5>
-        </div>
-
-        <a href="{% url 'payslips' %}" class="btn btn-secondary mt-3">Back to Payslips</a>
+        <a href="{% url 'payslips' %}" class="btn btn-outline-accent mt-3">← Back to Payslips</a>
     </div>
 </div>
 {% endblock %}
