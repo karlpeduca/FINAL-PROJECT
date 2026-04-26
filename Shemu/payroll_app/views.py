@@ -207,6 +207,12 @@ def update_employee(request, id_number):
         employee.name  = request.POST.get('name', '').strip()
         employee.rate  = float(request.POST.get('rate', employee.rate))
         allowance      = request.POST.get('allowance', '').strip()
+        
+        for char in name:
+            if not (char.isalpha() or char.isspace()):
+                messages.error(request, 'Name must contain only letters and spaces.')
+                return render(request, 'payroll_app/update_employee.html', {'employee': employee})
+
         employee.allowance = float(allowance) if allowance else None
         employee.save()
         log_action(request.user, f'Updated employee: {employee.name} (ID: {id_number}) — rate changed from {old_rate} to {employee.rate}')
