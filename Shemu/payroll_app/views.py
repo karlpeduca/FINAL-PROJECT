@@ -208,7 +208,7 @@ def update_employee(request, id_number):
         employee.rate  = float(request.POST.get('rate', employee.rate))
         allowance      = request.POST.get('allowance', '').strip()
         
-        for char in name:
+        for char in employee.name:
             if not (char.isalpha() or char.isspace()):
                 messages.error(request, 'Name must contain only letters and spaces.')
                 return render(request, 'payroll_app/update_employee.html', {'employee': employee})
