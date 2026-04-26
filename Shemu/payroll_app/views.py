@@ -70,6 +70,12 @@ def signup_view(request):
         password1 = request.POST.get('password1', '').strip()
         password2 = request.POST.get('password2', '').strip()
 
+        allowed_chars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890_"
+        for char in username:
+            if char not in allowed_chars:
+                messages.error(request, 'Invalid Username. Use only letters, numbers, and underscores. No spaces.')
+                return render(request, 'payroll_app/signup.html')
+
         if not username or not password1 or not password2:
             messages.error(request, 'All fields are required.')
             return render(request, 'payroll_app/signup.html')
@@ -162,6 +168,15 @@ def create_employee(request):
         if not name or not id_number or not rate:
             messages.error(request, 'Name, ID Number, and Rate are required.')
             return render(request, 'payroll_app/create_employee.html')
+        
+        for char in name:
+            if not (char.isalpha() or char.isspace()):
+                messages.error(request, 'Name must contain only letters and spaces.')
+                return render(request, 'payroll_app/create_employee.html')
+
+        if not id_number.isdigit():
+            messages.error(request, 'ID number must contain digits only.')
+            return render(request, 'payroll_app/create_employee.html')
 
         if Employee.objects.filter(pk=id_number).exists():
             messages.error(request, f'Employee with ID {id_number} already exists.')
@@ -250,6 +265,8 @@ def payslips(request):
 
         if not month or not year or not cycle:
             error_message = 'Please fill in all fields.'
+        elif not year.isdigit():
+            error_message = 'Year must be a number.'
         else:
             cycle      = int(cycle)
             date_range = MONTH_DATE_RANGES[month][cycle - 1]
