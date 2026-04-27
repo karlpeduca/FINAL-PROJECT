@@ -117,23 +117,24 @@ def manage_account(request):
             for char in new_username:
                 if char not in allowed_chars:
                     error_fields['username'] = 'Please use letters, numbers, and underscores only.'
-
-            if new_username and new_username != user.username:
-                if User.objects.filter(username=new_username).exists():
-                    error_fields['username'] = 'That username is already taken.'
-                else:
-                    old_username = user.username
-                    user.username = new_username
-                    user.save()
-                    log_action(user, f'Changed username from {old_username} to {new_username}')
-                    messages.success(request, 'Username updated.')
+            if not new_username or new_username == user.username:
+                error_fields['username'] = 'Please enter a new username.'
+            elif User.objects.filter(username=new_username).exists():
+                error_fields['username'] = 'That username is already taken.'
+            
+            if not error_fields:
+                old_username = user.username
+                user.username = new_username
+                user.save()
+                log_action(user, f'Changed username from {old_username} to {new_username}')
+                messages.success(request, 'Username updated.')
         
         elif action == "change_password":
             if not old_password:
                 error_fields['old_password'] = 'Please enter your current password.'
             elif not user.check_password(old_password):
                 error_fields['old_password'] = 'Current password is incorrect.'
-                
+
             if new_password1 != new_password2:
                 error_fields['new_password2'] = 'Passwords do not match.'
             if not new_password1:
