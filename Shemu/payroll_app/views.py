@@ -31,6 +31,8 @@ TAX_RATE = 0.2
 
 allowed_chars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890_"
 
+allowed_name = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -."
+
 
 # ── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -183,13 +185,9 @@ def create_employee(request):
             return render(request, 'payroll_app/create_employee.html')
         
         for char in name:
-            if not (char.isalpha() or char.isspace()):
-                messages.error(request, 'Name must contain only letters and spaces.')
+            if char not in allowed_name:
+                messages.error(request, 'Name contains invalid characters (Allowed: Letters, spaces, hyphens, and dots).')
                 return render(request, 'payroll_app/create_employee.html')
-
-        if not id_number.isdigit():
-            messages.error(request, 'ID number must contain digits only.')
-            return render(request, 'payroll_app/create_employee.html')
 
         if Employee.objects.filter(pk=id_number).exists():
             messages.error(request, f'Employee with ID {id_number} already exists.')
@@ -222,8 +220,8 @@ def update_employee(request, id_number):
         allowance      = request.POST.get('allowance', '').strip()
         
         for char in employee.name:
-            if not (char.isalpha() or char.isspace()):
-                messages.error(request, 'Name must contain only letters and spaces.')
+            if char not in allowed_name:
+                messages.error(request, 'Invalid characters in name.')
                 return render(request, 'payroll_app/update_employee.html', {'employee': employee})
 
         employee.allowance = float(allowance) if allowance else None
