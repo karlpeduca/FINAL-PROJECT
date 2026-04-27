@@ -29,6 +29,8 @@ PHILHEALTH_RATE = 0.04
 SSS_RATE = 0.045
 TAX_RATE = 0.2
 
+allowed_chars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890_"
+
 
 # ── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -70,7 +72,6 @@ def signup_view(request):
         password1 = request.POST.get('password1', '').strip()
         password2 = request.POST.get('password2', '').strip()
 
-        allowed_chars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890_"
         for char in username:
             if char not in allowed_chars:
                 messages.error(request, 'Invalid Username. Use only letters, numbers, and underscores. No spaces.')
@@ -110,34 +111,45 @@ def manage_account(request):
         new_password2 = request.POST.get('new_password2', '').strip()
         form_data     = {'username': new_username}
         user          = request.user
+        action = request.POST.get("action")
 
-        if new_username and new_username != user.username:
-            if User.objects.filter(username=new_username).exists():
-                error_fields['username'] = 'That username is already taken.'
-            else:
-                old_username = user.username
-                user.username = new_username
-                user.save()
-                log_action(user, f'Changed username from {old_username} to {new_username}')
-                messages.success(request, 'Username updated.')
+        if action == "change_username":
+            for char in new_username:
+                if char not in allowed_chars:
+                    error_fields['username'] = 'Please use letters, numbers, and underscores only.'
 
-        if old_password or new_password1 or new_password2:
-            if not user.check_password(old_password):
+            if new_username and new_username != user.username:
+                if User.objects.filter(username=new_username).exists():
+                    error_fields['username'] = 'That username is already taken.'
+                else:
+                    old_username = user.username
+                    user.username = new_username
+                    user.save()
+                    log_action(user, f'Changed username from {old_username} to {new_username}')
+                    messages.success(request, 'Username updated.')
+        
+        elif action == "change_password":
+            if not old_password:
+                error_fields['old_password'] = 'Please enter your current password.'
+            elif not user.check_password(old_password):
                 error_fields['old_password'] = 'Current password is incorrect.'
+                
             if new_password1 != new_password2:
                 error_fields['new_password2'] = 'Passwords do not match.'
             if not new_password1:
                 error_fields['new_password1'] = 'New password cannot be empty.'
+            if not new_password2:
+                error_fields['new_password2'] = 'Please re-enter your new password.'
 
             if not error_fields:
-                user.set_password(new_password1)
-                user.save()
-                log_action(user, 'Changed password')
-                messages.success(request, 'Password updated. Please log in again.')
-                return redirect('login')
+                    user.set_password(new_password1)
+                    user.save()
+                    log_action(user, 'Changed password')
+                    messages.success(request, 'Password updated. Please log in again.')
+                    return redirect('login')
 
-        if not error_fields:
-            return redirect('employees')
+            if not error_fields:
+                return redirect('employees')
 
     return render(request, 'payroll_app/manage_account.html', {
         'error_fields': error_fields,

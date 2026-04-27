@@ -17,6 +17,7 @@
                 <div class="invalid-feedback" style="color:#ff4d4d;">{{ error_fields.username }}</div>
             {% endif %}
         </div>
+        <button type="submit" class="btn btn-accent w-100 mb-5" name="action" value="change_username">Save Changes</button>
 
         <h6 class="text-uppercase mb-3" style="color:var(--muted); letter-spacing:1px; font-size:0.78rem;">Change Password</h6>
         <div class="mb-3">
@@ -41,7 +42,7 @@
             {% endif %}
         </div>
 
-        <button type="submit" class="btn btn-accent w-100 mb-2">Save Changes</button>
+        <button type="submit" class="btn btn-accent w-100 mb-2" name="action" value="change_password">Save Changes</button>
         <a href="{% url 'employees' %}" class="btn btn-outline-secondary w-100">Cancel</a>
     </form>
 </div>
