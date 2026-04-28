@@ -29,13 +29,19 @@
                 <select name="month" class="form-select" required>
                     <option value="" disabled selected>Choose...</option>
                     {% for m in months %}
-                        <option value="{{ m }}">{{ m }}</option>
+                        <option value="{{ m }}" >{{ m }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Year</label>
-                <input type="text" name="year" class="form-control" placeholder="e.g. 2026" required>
+    <label class="form-label">Year</label>
+    <input type="number" 
+           name="year" 
+           class="form-control" 
+           placeholder="e.g. 2026" 
+           min="2000" 
+           max="{{ current_year }}" 
+           required>
             </div>
             <div class="col-md-2">
                 <label class="form-label">Cycle</label>

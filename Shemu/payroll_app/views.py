@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -284,6 +285,14 @@ def payslips(request):
             error_message = 'Please fill in all fields.'
         elif not year.isdigit():
             error_message = 'Year must be a number.'
+        elif month not in MONTH_DATE_RANGES:
+            error_message = 'Invalid month selected.'
+        elif not cycle.isdigit() or int(cycle) not in [1, 2]:
+            error_message = 'Cycle must be 1 or 2.'
+        elif int(year) > datetime.now().year:
+            error_message = f'Year cannot be greater than {datetime.now().year}.'
+        elif int(year) == datetime.now().year and MONTHS.index(month) > datetime.now().month - 1:
+            error_message = f'Cannot generate payslip for a future month. Today is {MONTHS[datetime.now().month - 1]} {datetime.now().year}.'
         else:
             cycle      = int(cycle)
             date_range = MONTH_DATE_RANGES[month][cycle - 1]
@@ -347,6 +356,8 @@ def payslips(request):
         'payslips':      all_payslips,
         'months':        MONTHS,
         'error_message': error_message,
+        'current_year':  datetime.now().year,
+        'current_month': MONTHS[datetime.now().month - 1],
     }
     return render(request, 'payroll_app/payslips.html', context)
 
